@@ -15,6 +15,8 @@ OpentelemetryBandit.setup()
 OpentelemetryPhoenix.setup(adapter: :bandit)
 ```
 
+*Note:* Please, vote for the PR to opentelemetry-phoenix: https://github.com/open-telemetry/opentelemetry-erlang-contrib/pull/249
+
 ## Installation
 
 ```elixir
