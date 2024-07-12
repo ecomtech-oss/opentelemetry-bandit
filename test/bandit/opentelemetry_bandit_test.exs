@@ -100,10 +100,8 @@ defmodule OpentelemetryBanditTest do
         [:bandit, :request, :stop],
         %{duration: 444, resp_body_bytes: 10},
         %{
-          conn: nil,
-          status: 500,
+          conn: %Plug.Conn{method: "GET", status: 500},
           error: "Internal Server Error",
-          method: "GET",
           request_target: {nil, nil, nil, "/not_existing_route"}
         }
       )
@@ -130,10 +128,8 @@ defmodule OpentelemetryBanditTest do
         [:bandit, :request, :stop],
         %{duration: 444, resp_body_bytes: 10},
         %{
-          conn: nil,
-          status: 500,
+          conn: %Plug.Conn{method: "GET", status: 500},
           error: "Internal Server Error",
-          method: "GET",
           request_target: nil
         }
       )
@@ -155,6 +151,7 @@ defmodule OpentelemetryBanditTest do
              } = :otel_attributes.map(attributes)
     end
 
+    @tag capture_log: true
     test "exception catch span" do
       Req.get("http://localhost:4000/exception", retry: false)
 

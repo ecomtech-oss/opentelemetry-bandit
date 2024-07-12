@@ -40,7 +40,7 @@ defmodule OpentelemetryBandit do
   end
 
   def handle_request_stop(_event, measurements, meta, _config) do
-    conn = Map.get(meta, :conn)
+    conn = Map.get(meta, :conn, %{method: nil, status: nil})
     duration = measurements.duration
     end_time = :opentelemetry.timestamp()
     start_time = end_time - duration
@@ -52,10 +52,10 @@ defmodule OpentelemetryBandit do
       if Map.has_key?(meta, :error) do
         %{
           Trace.http_url() => url,
-          Trace.http_method() => meta.method,
+          Trace.http_method() => conn.method,
           Trace.net_transport() => :"IP.TCP",
           Trace.http_response_content_length() => measurements.resp_body_bytes,
-          Trace.http_status_code() => meta.status
+          Trace.http_status_code() => conn.status
         }
       else
         %{
@@ -65,8 +65,8 @@ defmodule OpentelemetryBandit do
           Trace.net_peer_name() => conn.host,
           Trace.net_peer_port() => conn.port,
           Trace.http_target() => conn.request_path,
-          Trace.http_method() => meta.method,
-          Trace.http_status_code() => meta.status,
+          Trace.http_method() => conn.method,
+          Trace.http_status_code() => conn.status,
           Trace.http_response_content_length() => measurements.resp_body_bytes,
           Trace.net_transport() => :"IP.TCP",
           Trace.http_user_agent() => user_agent(conn)
@@ -75,7 +75,7 @@ defmodule OpentelemetryBandit do
 
     span_kind = if Map.has_key?(meta, :error), do: :error, else: :server
 
-    span_id = "HTTP #{meta.method} #{request_path}" |> String.trim()
+    span_id = "HTTP #{conn.method} #{request_path}" |> String.trim()
 
     OpenTelemetry.Tracer.start_span(span_id, %{
       attributes: attributes,
